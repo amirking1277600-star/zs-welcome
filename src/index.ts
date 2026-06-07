@@ -9,7 +9,6 @@ import {
   PermissionFlagsBits 
 } from "discord.js";
 
-// إعداد البوت مع كل الصلاحيات اللازمة
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -19,14 +18,14 @@ const client = new Client({
   ],
 });
 
-// تخزين قناة الترحيب في الذاكرة (مؤقتاً)
+// متغير ثابت عشان الترحيب يشتغل
 let activeWelcomeChannelId: string | null = process.env.DISCORD_WELCOME_CHANNEL_ID || null;
 
 const commands = [
   new SlashCommandBuilder()
     .setName("welcome")
     .setDescription("إعدادات الترحيب")
-    .addSubcommand(sub => sub.setName("test").setDescription("إرسال رسالة ترحيب تجريبية"))
+    .addSubcommand(sub => sub.setName("test").setDescription("إرسال ترحيب تجريبي"))
     .addSubcommand(sub => sub.setName("setchannel")
       .setDescription("تحديد قناة الترحيب")
       .addChannelOption(opt => opt.setName("channel").setDescription("اختر القناة").addChannelTypes(ChannelType.GuildText).setRequired(true))
@@ -36,13 +35,13 @@ const commands = [
 ];
 
 client.once("ready", async (c) => {
-  console.log(`Bot is online! Logged in as ${c.user.tag}`);
-  const rest = new REST().setToken(process.env.BOT_TOKEN_NEW!);
+  console.log(`✅ البوت اشتغل باسم: ${c.user.tag}`);
   try {
+    const rest = new REST().setToken(process.env.BOT_TOKEN_NEW!);
     await rest.put(Routes.applicationCommands(c.user.id), { body: commands });
-    console.log("Slash commands registered.");
+    console.log("✅ تم تسجيل الأوامر (Slash Commands) بنجاح!");
   } catch (err) {
-    console.error("Failed to register commands:", err);
+    console.error("❌ خطأ في تسجيل الأوامر:", err);
   }
 });
 
@@ -56,13 +55,9 @@ client.on("interactionCreate", async (interaction) => {
     activeWelcomeChannelId = channel.id;
     await interaction.reply({ content: `✅ تم ضبط قناة الترحيب إلى <#${channel.id}>`, ephemeral: true });
   } else if (sub === "test") {
-    if (!activeWelcomeChannelId) return await interaction.reply({ content: "حدد قناة الترحيب أولاً!", ephemeral: true });
-    const channel = interaction.guild?.channels.cache.get(activeWelcomeChannelId);
-    if (channel && channel.isTextBased()) {
-      // محاكاة حدث الترحيب
-      client.emit("guildMemberAdd", interaction.member as any);
-      await interaction.reply({ content: "تم إرسال رسالة تجريبية!", ephemeral: true });
-    }
+    if (!activeWelcomeChannelId) return await interaction.reply({ content: "❌ حدد قناة الترحيب أولاً بـ /welcome setchannel", ephemeral: true });
+    client.emit("guildMemberAdd", interaction.member as any);
+    await interaction.reply({ content: "✅ تم إرسال رسالة تجريبية!", ephemeral: true });
   }
 });
 
@@ -72,15 +67,13 @@ client.on("guildMemberAdd", async (member) => {
   
   if (channel && channel.isTextBased()) {
     const avatarUrl = member.user.displayAvatarURL({ size: 512 });
-    
     const embed = new EmbedBuilder()
       .setTitle(`Welcome to ${member.guild.name}! 🎉`)
       .setDescription(`Hey ${member}, glad you're here!\nYou are our **member #${member.guild.memberCount}**. We're thrilled to have you!`)
       .setThumbnail(avatarUrl)
       .setImage(avatarUrl)
       .setColor(0x5865f2)
-      .setTimestamp()
-      .setFooter({ text: "Member joined" });
+      .setTimestamp();
 
     await channel.send({
       content: `Welcome, ${member}! 👋`,
@@ -89,4 +82,10 @@ client.on("guildMemberAdd", async (member) => {
   }
 });
 
-// تسجيل الدخول باستخدام المتغير اللي
+// التشغيل
+const token = process.env.BOT_TOKEN_NEW;
+if (!token) {
+  console.error("❌ خطأ: BOT_TOKEN_NEW غير موجود في المتغيرات!");
+} else {
+  client.login(token.trim());
+}
