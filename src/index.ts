@@ -1,11 +1,13 @@
 import { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import 'dotenv/config';
 
+// إعدادات البوت (تأكد من تفعيل Privileged Intents في Developer Portal)
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessages
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
   ]
 });
 
@@ -14,10 +16,13 @@ client.once('ready', () => {
 });
 
 client.on('guildMemberAdd', async (member) => {
+  // بنجيب القناة الافتراضية للترحيب
   const channel = member.guild.systemChannel;
   if (!channel) return;
 
   const memberCount = member.guild.memberCount;
+  
+  // حماية عشان لو مفيش صورة للمستخدم ميعلقش
   const avatarUrl = member.user.displayAvatarURL() || "https://discord.com/assets/f78426a064b9d2146903.png";
 
   const embed = new EmbedBuilder()
@@ -36,9 +41,11 @@ client.on('guildMemberAdd', async (member) => {
   }
 });
 
-// للتأكد من عدم وجود أخطاء في الأوامر
-const welcomeCommand = new SlashCommandBuilder()
-  .setName('welcome')
-  .setDescription('Welcome system configuration');
+// تسجيل الدخول باستخدام الـ Variable اللي إنت حاطه في Railway
+const token = process.env.DISCORD_BOT_TOKEN;
 
-client.login(process.env["BOT_TOKEN"]); // اتأكد إن الـ Key في Railway هو BOT_TOKEN
+if (!token) {
+  console.error("Error: DISCORD_BOT_TOKEN is missing in environment variables!");
+} else {
+  client.login(token);
+}
