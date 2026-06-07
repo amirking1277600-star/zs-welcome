@@ -31,13 +31,12 @@ client.on('guildMemberAdd', async (member) => {
   }
 });
 
-// هنا المشكلة الأساسية: تأكد أن الاسم في Railway هو BOT_TOKEN_NEW
-const token = process.env.BOT_TOKEN_NEW;
+const token = process.env.TOKEN;
 
 if (!token) {
-  console.error("ERROR: BOT_TOKEN_NEW is not set in Railway!");
+  console.error("ERROR: TOKEN variable is not set in Railway!");
 } else {
-  // trim() تحذف أي مسافة مخفية بالخطأ
+  console.log("Attempting to login with token starting with:", token.substring(0, 5) + "...");
   client.login(token.trim()).catch((err) => {
     console.error("FAILED TO LOGIN:", err.message);
   });
