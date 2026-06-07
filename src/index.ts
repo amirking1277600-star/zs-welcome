@@ -16,13 +16,12 @@ client.once('ready', () => {
 });
 
 client.on('guildMemberAdd', async (member) => {
-  // بنجيب القناة الافتراضية للترحيب
   const channel = member.guild.systemChannel;
   if (!channel) return;
 
   const memberCount = member.guild.memberCount;
   
-  // حماية عشان لو مفيش صورة للمستخدم ميعلقش
+  // حماية ضد الـ undefined في الصورة
   const avatarUrl = member.user.displayAvatarURL() || "https://discord.com/assets/f78426a064b9d2146903.png";
 
   const embed = new EmbedBuilder()
@@ -41,11 +40,16 @@ client.on('guildMemberAdd', async (member) => {
   }
 });
 
-// تسجيل الدخول باستخدام الـ Variable اللي إنت حاطه في Railway
-const token = process.env.DISCORD_BOT_TOKEN;
+// الأوامر البسيطة عشان نتفادى خطأ الـ Builder
+const welcomeCommand = new SlashCommandBuilder()
+  .setName('welcome')
+  .setDescription('Welcome system configuration');
+
+// استخدام الاسم الجديد للمتغير (BOT_TOKEN_NEW)
+const token = process.env.BOT_TOKEN_NEW;
 
 if (!token) {
-  console.error("Error: DISCORD_BOT_TOKEN is missing in environment variables!");
+  console.error("Error: BOT_TOKEN_NEW is missing in environment variables!");
 } else {
   client.login(token);
 }
