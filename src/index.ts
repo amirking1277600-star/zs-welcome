@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import 'dotenv/config';
 
-// إعدادات البوت (تأكد من تفعيل Privileged Intents في Developer Portal)
+// إعدادات البوت الأساسية
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -20,8 +20,6 @@ client.on('guildMemberAdd', async (member) => {
   if (!channel) return;
 
   const memberCount = member.guild.memberCount;
-  
-  // حماية ضد الـ undefined في الصورة
   const avatarUrl = member.user.displayAvatarURL() || "https://discord.com/assets/f78426a064b9d2146903.png";
 
   const embed = new EmbedBuilder()
@@ -40,16 +38,18 @@ client.on('guildMemberAdd', async (member) => {
   }
 });
 
-// الأوامر البسيطة عشان نتفادى خطأ الـ Builder
+// التعامل مع الـ Slash Command
 const welcomeCommand = new SlashCommandBuilder()
   .setName('welcome')
   .setDescription('Welcome system configuration');
 
-// استخدام الاسم الجديد للمتغير (BOT_TOKEN_NEW)
+// استخدام المتغير اللي حطيناه في Railway
 const token = process.env.BOT_TOKEN_NEW;
 
+// كود للتأكد من وصول التوكن للـ Logs
 if (!token) {
   console.error("Error: BOT_TOKEN_NEW is missing in environment variables!");
 } else {
-  client.login(token);
+  console.log("Token length is:", token.length);
+  client.login(token).catch(err => console.error("Login failed:", err));
 }
