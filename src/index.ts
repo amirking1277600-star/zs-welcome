@@ -1,7 +1,6 @@
 import { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import 'dotenv/config';
 
-// إعدادات البوت الأساسية
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -25,9 +24,7 @@ client.on('guildMemberAdd', async (member) => {
   const embed = new EmbedBuilder()
     .setColor(0x0099FF)
     .setTitle(`Welcome to ${member.guild.name}! 🎉`)
-    .setDescription(
-      `Hey ${member}, glad you're here!\nYou are our **member #${memberCount}**.`
-    )
+    .setDescription(`Hey ${member}, glad you're here!\nYou are our **member #${memberCount}**.`)
     .setThumbnail(avatarUrl)
     .setTimestamp();
 
@@ -38,18 +35,73 @@ client.on('guildMemberAdd', async (member) => {
   }
 });
 
-// التعامل مع الـ Slash Command
 const welcomeCommand = new SlashCommandBuilder()
   .setName('welcome')
   .setDescription('Welcome system configuration');
 
-// استخدام المتغير اللي حطيناه في Railway
-const token = process.env.BOT_TOKEN_NEW;
+// التعديل هنا: استخدام trim() لحذف أي مسافات مخفية
+const rawToken = process.env.BOT_TOKEN_NEW;
+const token = rawToken ? rawToken.trim() : undefined;
 
-// كود للتأكد من وصول التوكن للـ Logs
 if (!token) {
-  console.error("Error: BOT_TOKEN_NEW is missing in environment variables!");
+  console.error("Error: BOT_TOKEN_NEW is missing!");
 } else {
-  console.log("Token length is:", token.length);
-  client.login(token).catch(err => console.error("Login failed:", err));
+  console.log("Token length after trim:", token.length);
+  client.login(token).catch(err => {
+    console.error("CRITICAL LOGIN ERROR:");
+    console.error(err);
+  });
+}import { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import 'dotenv/config';
+
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ]
+});
+
+client.once('ready', () => {
+  console.log(`Bot is ready! Logged in as ${client.user?.tag}`);
+});
+
+client.on('guildMemberAdd', async (member) => {
+  const channel = member.guild.systemChannel;
+  if (!channel) return;
+
+  const memberCount = member.guild.memberCount;
+  const avatarUrl = member.user.displayAvatarURL() || "https://discord.com/assets/f78426a064b9d2146903.png";
+
+  const embed = new EmbedBuilder()
+    .setColor(0x0099FF)
+    .setTitle(`Welcome to ${member.guild.name}! 🎉`)
+    .setDescription(`Hey ${member}, glad you're here!\nYou are our **member #${memberCount}**.`)
+    .setThumbnail(avatarUrl)
+    .setTimestamp();
+
+  try {
+    await channel.send({ embeds: [embed] });
+  } catch (error) {
+    console.error("Error sending welcome message:", error);
+  }
+});
+
+const welcomeCommand = new SlashCommandBuilder()
+  .setName('welcome')
+  .setDescription('Welcome system configuration');
+
+// التعديل هنا: استخدام trim() لحذف أي مسافات مخفية
+const rawToken = process.env.BOT_TOKEN_NEW;
+const token = rawToken ? rawToken.trim() : undefined;
+
+if (!token) {
+  console.error("Error: BOT_TOKEN_NEW is missing!");
+} else {
+  console.log("Token length after trim:", token.length);
+  client.login(token).catch(err => {
+    console.error("CRITICAL LOGIN ERROR:");
+    console.error(err);
+  });
 }
